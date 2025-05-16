@@ -1,38 +1,45 @@
 package com.example.notes.ui.notes
 
-package com.example.notes.ui.notes
-
-import android.app.Application
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.Note
-import com.example.notes.data.NotesDatabase
+import com.example.notes.data.NoteDao
+import com.example.notes.data.NotesApi
 import com.example.notes.utils.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-// Дополнительно, если используете sealed class для состояний:
-sealed class NotesState {
-    object Loading : NotesState()
-    data class Success(val notes: List<Note>) : NotesState()
-    data class Error(val message: String) : NotesState()
-}
+class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
+    private val _notes = MutableStateFlow<List<Note>>(emptyList())
+    val notes: StateFlow<List<Note>> = _notes
 
-class NotesViewModel(application: Application) : AndroidViewModel(application) {
-    private val dao = NotesDatabase.getInstance(application).noteDao()
-    private val api = RetrofitClient.instance
+    private val _isLoading = MutableStateFlow(false)
+    val isLoading: StateFlow<Boolean> = _isLoading
 
-    val notes: LiveData<List<Note>> = dao.getAll()
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error
+
+    private val api: NotesApi = RetrofitClient.instance
+
+    init {
+        loadNotes()
+    }
 
     fun loadNotes() {
+        _isLoading.value = true
+        _error.value = null
+
         viewModelScope.launch {
             try {
                 val remoteNotes = api.getNotes()
-                remoteNotes.forEach { dao.insert(it) }
+                noteDao.insertAll(remoteNotes)
+                _notes.value = noteDao.getAll()
             } catch (e: Exception) {
-                // Ошибка сети - используем локальные данные
+                _error.value = "Ошибка загрузки: ${e.message}"
+                _notes.value = noteDao.getAll()
+            } finally {
+                _isLoading.value = false
             }
         }
     }
@@ -41,9 +48,10 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 api.deleteNote(note.id)
-                dao.delete(note)
+                noteDao.delete(note)
+                _notes.value = noteDao.getAll()
             } catch (e: Exception) {
-                // Обработка ошибки
+                _error.value = "Ошибка удаления: ${e.message}"
             }
         }
     }

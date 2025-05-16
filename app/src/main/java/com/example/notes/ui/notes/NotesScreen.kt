@@ -2,8 +2,6 @@ package com.example.notes.ui.notes
 
 import androidx.compose.runtime.LaunchedEffect
 
-package com.example.notes.ui.notes
-
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
