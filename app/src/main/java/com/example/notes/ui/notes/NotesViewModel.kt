@@ -1,16 +1,23 @@
 package com.example.notes.ui.notes
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.Note
 import com.example.notes.data.NoteDao
 import com.example.notes.data.NotesApi
+import com.example.notes.data.NotesDatabase
 import com.example.notes.utils.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
+class NotesViewModel(application: Application) : AndroidViewModel(application) {
+    private val dao = NotesDatabase.getInstance(application).noteDao()
+    private val api = RetrofitClient.notesApi
+
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     val notes: StateFlow<List<Note>> = _notes
 
@@ -19,8 +26,6 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
-
-    private val api: NotesApi = RetrofitClient.instance
 
     init {
         loadNotes()
@@ -33,25 +38,36 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
         viewModelScope.launch {
             try {
                 val remoteNotes = api.getNotes()
-                noteDao.insertAll(remoteNotes)
-                _notes.value = noteDao.getAll()
+                dao.insertAll(remoteNotes)
+                val localNotes = dao.getAll()
+                _notes.value = localNotes
             } catch (e: Exception) {
-                _error.value = "Ошибка загрузки: ${e.message}"
-                _notes.value = noteDao.getAll()
+                _error.value = e.message
+                _notes.value = dao.getAll()
             } finally {
                 _isLoading.value = false
             }
         }
     }
-
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             try {
                 api.deleteNote(note.id)
-                noteDao.delete(note)
-                _notes.value = noteDao.getAll()
+                dao.delete(note)
+                _notes.value = dao.getAll()
             } catch (e: Exception) {
                 _error.value = "Ошибка удаления: ${e.message}"
+            }
+        }
+    }
+
+    companion object {
+        fun provideFactory(application: Application): ViewModelProvider.Factory {
+            return object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return NotesViewModel(application) as T
+                }
             }
         }
     }
