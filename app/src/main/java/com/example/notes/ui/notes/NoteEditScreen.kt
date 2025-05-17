@@ -7,8 +7,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.data.Note
 import java.util.UUID
@@ -95,5 +93,3 @@ fun EditNoteScreen(
         }
     }
 }
-
-// В классе EditNoteViewModel добавьте:

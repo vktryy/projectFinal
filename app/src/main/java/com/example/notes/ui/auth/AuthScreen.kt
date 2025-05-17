@@ -29,13 +29,11 @@ import com.example.notes.ui.auth.AuthViewModel
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = viewModel() // Инициализация viewModel
+    viewModel: AuthViewModel = viewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoginMode by remember { mutableStateOf(true) }
-
-    // Получаем состояние из ViewModel
     val state by viewModel.state.collectAsState()
 
     Column(

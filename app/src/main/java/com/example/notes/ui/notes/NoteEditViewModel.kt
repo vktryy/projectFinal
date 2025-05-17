@@ -1,4 +1,3 @@
-// EditNoteViewModel.kt
 package com.example.notes.ui.notes
 
 import android.app.Application

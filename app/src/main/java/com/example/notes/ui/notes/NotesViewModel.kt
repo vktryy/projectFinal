@@ -6,8 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.example.notes.data.Note
-import com.example.notes.data.NoteDao
-import com.example.notes.data.NotesApi
 import com.example.notes.data.NotesDatabase
 import com.example.notes.utils.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
