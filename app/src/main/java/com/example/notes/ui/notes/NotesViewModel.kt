@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = NotesDatabase.getInstance(application).noteDao()
-    private val api = RetrofitClient.notesApi
+    private val api = RetrofitClient.createNotesApi()
 
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     val notes: StateFlow<List<Note>> = _notes
