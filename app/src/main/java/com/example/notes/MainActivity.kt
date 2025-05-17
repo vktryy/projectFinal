@@ -18,7 +18,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-class NotesScreen {
-
-}
