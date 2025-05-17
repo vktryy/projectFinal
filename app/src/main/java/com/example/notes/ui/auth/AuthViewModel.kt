@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
-    private val authApi = RetrofitClient.authApi
+    private val authApi = RetrofitClient.createAuthApi()
 
     sealed class AuthState {
         object Idle : AuthState()
