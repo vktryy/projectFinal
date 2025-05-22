@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.logging.interceptor)
 
     implementation(libs.coreDestinations)
+    implementation(libs.androidx.room.common.jvm)
     ksp(libs.composeDestinationsKSP)
 
     implementation(libs.kotlinx.serialization.json)

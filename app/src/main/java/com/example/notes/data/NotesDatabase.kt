@@ -1,23 +1,63 @@
 package com.example.notes.data
 
-import android.content.Context
+import androidx.room.Dao
 import androidx.room.Database
+import androidx.room.Delete
+import androidx.room.Entity
+import androidx.room.Insert
+import androidx.room.PrimaryKey
+import androidx.room.Query
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import androidx.room.Update
+import android.content.Context
 
-@Database(entities = [Note::class], version = 1)
+@Database(
+    entities = [Note::class],
+    version = 1
+)
 abstract class NotesDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
 
     companion object {
+        @Volatile
         private var instance: NotesDatabase? = null
 
         fun getInstance(context: Context): NotesDatabase {
-            return instance ?: Room.databaseBuilder(
-                context,
-                NotesDatabase::class.java,
-                "notes_db"
-            ).build().also { instance = it }
+            return instance ?: synchronized(this) {
+                instance ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    NotesDatabase::class.java,
+                    "notes_db"
+                ).build().also { instance = it }
+            }
         }
     }
+}
+
+@Entity(tableName = "Note")
+data class Notes(
+    @PrimaryKey
+    val id: String,
+    val title: String,
+    val content: String,
+    val date: Long
+)
+
+@Dao
+interface NoteDao {
+    @Query("SELECT * FROM Note")
+    fun getAll(): List<Note>
+
+    @Insert
+    suspend fun insert(note: Note)
+
+    @Insert
+    suspend fun insertAll(notes: List<Note>)
+
+    @Update
+    suspend fun update(note: Note)
+
+    @Delete
+    suspend fun delete(note: Note)
 }
