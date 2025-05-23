@@ -22,7 +22,7 @@ fun EditNoteScreen(
     )
 ) {
     var title by remember { mutableStateOf(note?.title ?: "") }
-    var content by remember { mutableStateOf(note?.content ?: "") }
+    var content by remember { mutableStateOf(note?.text ?: "") }
 
     Column(
         modifier = Modifier
@@ -62,8 +62,7 @@ fun EditNoteScreen(
                             Note(
                                 id = note.id,
                                 title = title,
-                                content = content,
-                                date = System.currentTimeMillis()
+                                text = content
                             )
                         ) {
                             onBack()
@@ -80,8 +79,7 @@ fun EditNoteScreen(
                         Note(
                             id = note?.id ?: UUID.randomUUID().toString(),
                             title = title,
-                            content = content,
-                            date = System.currentTimeMillis()
+                            text = content
                         )
                     ) {
                         onBack()

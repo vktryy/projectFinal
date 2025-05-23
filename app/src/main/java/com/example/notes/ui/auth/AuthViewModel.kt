@@ -3,7 +3,7 @@ package com.example.notes.ui.auth
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notes.data.AuthRequest
+import com.example.notes.data.AuthApi
 import com.example.notes.utils.RetrofitClient
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,7 +15,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     sealed class AuthState {
         object Idle : AuthState()
         object Loading : AuthState()
-        data class Success(val token: String) : AuthState()
+        object Success : AuthState()  // Успешный вход/регистрация
         data class Error(val message: String) : AuthState()
     }
 
@@ -27,20 +27,16 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = AuthState.Loading
             viewModelScope.launch {
                 try {
-                    val response = authApi.register(AuthRequest(username, password))
+                    val response = authApi.register(
+                        AuthApi.SignupModel(username, password)
+                    )
                     if (response.isSuccessful) {
-                        _state.value = AuthState.Success(response.body()?.token ?: "")
+                        _state.value = AuthState.Success
                     } else {
-                        _state.value = AuthState.Error(
-                            when (response.code()) {
-                                400 -> "Некорректные данные"
-                                409 -> "Пользователь уже существует"
-                                else -> "Ошибка сервера"
-                            }
-                        )
+                        handleError(response.code())
                     }
                 } catch (e: Exception) {
-                    _state.value = AuthState.Error("Нет подключения к интернету")
+                    _state.value = AuthState.Error("Ошибка сети: ${e.message}")
                 }
             }
         }
@@ -51,22 +47,30 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             _state.value = AuthState.Loading
             viewModelScope.launch {
                 try {
-                    val response = authApi.login(AuthRequest(username, password))
+                    val response = authApi.login(
+                        AuthApi.SigninModel(username, password)
+                    )
                     if (response.isSuccessful) {
-                        _state.value = AuthState.Success(response.body()?.token ?: "")
+                        _state.value = AuthState.Success
                     } else {
-                        _state.value = AuthState.Error(
-                            when (response.code()) {
-                                401 -> "Неверный логин или пароль"
-                                else -> "Ошибка сервера"
-                            }
-                        )
+                        handleError(response.code())
                     }
                 } catch (e: Exception) {
-                    _state.value = AuthState.Error("Нет подключения к интернету")
+                    _state.value = AuthState.Error("Ошибка сети: ${e.message}")
                 }
             }
         }
+    }
+
+    private fun handleError(code: Int) {
+        _state.value = AuthState.Error(
+            when (code) {
+                400 -> "Некорректные данные"
+                401 -> "Неверные учетные данные"
+                409 -> "Пользователь уже существует"
+                else -> "Ошибка сервера ($code)"
+            }
+        )
     }
 
     private fun validateInput(username: String, password: String): Boolean {
@@ -77,10 +81,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             }
             password.isBlank() -> {
                 _state.value = AuthState.Error("Введите пароль")
-                false
-            }
-            password.length < 6 -> {
-                _state.value = AuthState.Error("Пароль должен содержать ≥6 символов")
                 false
             }
             else -> true

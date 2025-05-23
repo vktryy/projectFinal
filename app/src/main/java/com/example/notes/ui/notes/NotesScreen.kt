@@ -89,7 +89,7 @@ fun NoteItem(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(note.title, style = MaterialTheme.typography.titleMedium)
             Spacer(modifier = Modifier.height(4.dp))
-            Text(note.content, style = MaterialTheme.typography.bodyMedium)
+            Text(note.text, style = MaterialTheme.typography.bodyMedium)
             Spacer(modifier = Modifier.height(8.dp))
             Button(
                 onClick = onDelete

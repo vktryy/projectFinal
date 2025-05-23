@@ -14,7 +14,8 @@ import android.content.Context
 
 @Database(
     entities = [Note::class],
-    version = 1
+    version = 1,
+    exportSchema = false
 )
 abstract class NotesDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
@@ -28,25 +29,24 @@ abstract class NotesDatabase : RoomDatabase() {
                 instance ?: Room.databaseBuilder(
                     context.applicationContext,
                     NotesDatabase::class.java,
-                    "notes_db"
+                    "notes_database"
                 ).build().also { instance = it }
             }
         }
     }
 }
 
-@Entity(tableName = "Note")
+@Entity(tableName = "notes")
 data class Notes(
     @PrimaryKey
     val id: String,
     val title: String,
-    val content: String,
-    val date: Long
+    val text: String
 )
 
 @Dao
 interface NoteDao {
-    @Query("SELECT * FROM Note")
+    @Query("SELECT * FROM notes")
     fun getAll(): List<Note>
 
     @Insert

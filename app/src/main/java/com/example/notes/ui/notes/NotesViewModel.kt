@@ -16,6 +16,8 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
     private val dao = NotesDatabase.getInstance(application).noteDao()
     private val api = RetrofitClient.createNotesApi()
 
+    private val authToken = "test_token_123"
+
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     val notes: StateFlow<List<Note>> = _notes
 
@@ -35,26 +37,45 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                val remoteNotes = api.getNotes()
-                dao.insertAll(remoteNotes)
-                val localNotes = dao.getAll()
-                _notes.value = localNotes
+                val response = api.getNotes(authToken)
+
+                // Проверяем успешность запроса
+                if (response.isSuccessful) {
+                    response.body()?.let { remoteNotes ->
+                        // Сохраняем в базу и обновляем UI
+                        dao.insertAll(remoteNotes)
+                        _notes.value = dao.getAll()
+                    }
+                } else {
+                    _error.value = "Ошибка сервера: ${response.code()}"
+                    _notes.value = dao.getAll()
+                }
             } catch (e: Exception) {
-                _error.value = e.message
+                _error.value = "Ошибка сети: ${e.message}"
                 _notes.value = dao.getAll()
             } finally {
                 _isLoading.value = false
             }
         }
     }
+
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             try {
-                api.deleteNote(note.id)
-                dao.delete(note)
-                _notes.value = dao.getAll()
+                // Удаляем заметку через API (передаем токен и ID заметки)
+                val response = api.deleteNote(
+                    token = authToken,
+                    noteId = note.id
+                )
+
+                if (response.isSuccessful) {
+                    dao.delete(note)
+                    _notes.value = dao.getAll()
+                } else {
+                    _error.value = "Ошибка сервера при удалении: ${response.code()}"
+                }
             } catch (e: Exception) {
-                _error.value = "Ошибка удаления: ${e.message}"
+                _error.value = "Ошибка сети при удалении: ${e.message}"
             }
         }
     }

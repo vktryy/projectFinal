@@ -15,18 +15,38 @@ import kotlinx.coroutines.launch
 class EditNoteViewModel(application: Application) : AndroidViewModel(application) {
     private val dao: NoteDao = NotesDatabase.getInstance(application).noteDao()
     private val api: NotesApi = RetrofitClient.createNotesApi()
+    private val token = "test_token_123"
 
     fun saveNote(note: Note, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
                 if (note.id.isBlank()) {
-                    val createdNote = api.addNote(note)
-                    dao.insert(createdNote)
+                    val response = api.addNote(
+                        token = token,
+                        newNote = NotesApi.NewNoteModel(
+                            title = note.title,
+                            text = note.text
+                        )
+                    )
+                    if (response.isSuccessful) {
+                        val createdNote = note.copy(id = response.body()?.note_id ?: "")
+                        dao.insert(createdNote)
+                        onSuccess()
+                    }
                 } else {
-                    api.updateNote(note.id, note)
-                    dao.update(note)
+                    val response = api.updateNote(
+                        token = token,
+                        noteId = note.id,
+                        patchNote = NotesApi.PatchNoteModel(
+                            title = note.title,
+                            text = note.text
+                        )
+                    )
+                    if (response.isSuccessful) {
+                        dao.update(note)
+                        onSuccess()
+                    }
                 }
-                onSuccess()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -36,9 +56,14 @@ class EditNoteViewModel(application: Application) : AndroidViewModel(application
     fun deleteNote(note: Note, onSuccess: () -> Unit) {
         viewModelScope.launch {
             try {
-                api.deleteNote(note.id)
-                dao.delete(note)
-                onSuccess()
+                val response = api.deleteNote(
+                    token = token,
+                    noteId = note.id
+                )
+                if (response.isSuccessful) {
+                    dao.delete(note)
+                    onSuccess()
+                }
             } catch (e: Exception) {
                 e.printStackTrace()
             }

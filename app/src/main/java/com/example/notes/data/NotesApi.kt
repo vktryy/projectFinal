@@ -1,22 +1,50 @@
 package com.example.notes.data
 
-import retrofit2.http.Body
-import retrofit2.http.DELETE
-import retrofit2.http.GET
-import retrofit2.http.POST
-import retrofit2.http.PUT
-import retrofit2.http.Path
+import retrofit2.Response
+import retrofit2.http.*
 
 interface NotesApi {
-    @GET("notes")
-    suspend fun getNotes(): List<Note>
+    @GET("api/note")
+    suspend fun getNotes(
+        @Header("Authorization") token: String
+    ): Response<List<Note>>
 
-    @POST("notes")
-    suspend fun addNote(@Body note: Note)
+    @GET("api/note/{note_id}")
+    suspend fun getNoteById(
+        @Header("Authorization") token: String,
+        @Path("note_id") noteId: String
+    ): Response<Note>
 
-    @PUT("notes/{id}")
-    suspend fun updateNote(@Path("id") id: String, @Body note: Note)
+    @POST("api/note")
+    suspend fun addNote(
+        @Header("Authorization") token: String,
+        @Body newNote: NewNoteModel
+    ): Response<NoteIdResponse>
 
-    @DELETE("notes/{id}")
-    suspend fun deleteNote(@Path("id") id: String)
+    @PATCH("api/note/{note_id}")
+    suspend fun updateNote(
+        @Header("Authorization") token: String,
+        @Path("note_id") noteId: String,
+        @Body patchNote: PatchNoteModel
+    ): Response<NoteIdResponse>
+
+    @DELETE("api/note/{note_id}")
+    suspend fun deleteNote(
+        @Header("Authorization") token: String,
+        @Path("note_id") noteId: String
+    ): Response<Unit>
+
+    data class NewNoteModel(
+        val title: String,
+        val text: String
+    )
+
+    data class PatchNoteModel(
+        val title: String?,
+        val text: String?
+    )
+
+    data class NoteIdResponse(
+        val note_id: String
+    )
 }

@@ -5,21 +5,23 @@ import retrofit2.http.Body
 import retrofit2.http.POST
 
 interface AuthApi {
-    @POST("auth/register")
+    @POST("api/user/signup")
     suspend fun register(
-        @Body request: AuthRequest
-    ): Response<AuthResponse>
-    @POST("auth/login")
+        @Body request: SignupModel
+    ): Response<Unit>
+
+    @POST("api/user/signin")
     suspend fun login(
-        @Body request: AuthRequest
-    ): Response<AuthResponse>
+        @Body request: SigninModel
+    ): Response<Unit>
+
+    data class SignupModel(
+        val username: String,
+        val password: String
+    )
+
+    data class SigninModel(
+        val username: String,
+        val password: String
+    )
 }
-
-data class AuthRequest(
-    val username: String,
-    val password: String
-)
-
-data class AuthResponse(
-    val token: String
-)

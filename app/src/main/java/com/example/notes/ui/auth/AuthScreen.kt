@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +30,8 @@ import com.example.notes.ui.auth.AuthViewModel
 
 @Composable
 fun AuthScreen(
-    viewModel: AuthViewModel = viewModel()
+    viewModel: AuthViewModel = viewModel(),
+    onAuthSuccess: () -> Unit
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -95,6 +97,11 @@ fun AuthScreen(
                     "Уже есть аккаунт? Войдите",
                 color = MaterialTheme.colorScheme.secondary
             )
+        }
+    }
+    LaunchedEffect(viewModel.state) {
+        if (viewModel.state.value is AuthViewModel.AuthState.Success) {
+            onAuthSuccess()
         }
     }
 }
