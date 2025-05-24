@@ -15,8 +15,8 @@ import java.util.UUID
 fun EditNoteScreen(
     note: Note? = null,
     onBack: () -> Unit,
-    viewModel: EditNoteViewModel = viewModel(
-        factory = EditNoteViewModel.provideFactory(
+    viewModel: NoteEditViewModel = viewModel(
+        factory = NoteEditViewModel.provideFactory(
             LocalContext.current.applicationContext as Application
         )
     )
@@ -59,14 +59,17 @@ fun EditNoteScreen(
                 Button(
                     onClick = {
                         viewModel.deleteNote(
-                            Note(
+                            note = Note(
                                 id = note.id,
                                 title = title,
                                 text = content
-                            )
-                        ) {
-                            onBack()
-                        }
+                            ),
+                            onSuccess = onBack,
+                            onError = { error ->
+                                // Обработка ошибки удаления
+                                // Можно показать Snackbar или Toast
+                            }
+                        )
                     }
                 ) {
                     Text("Удалить")
@@ -76,14 +79,17 @@ fun EditNoteScreen(
             Button(
                 onClick = {
                     viewModel.saveNote(
-                        Note(
+                        note = Note(
                             id = note?.id ?: UUID.randomUUID().toString(),
                             title = title,
                             text = content
-                        )
-                    ) {
-                        onBack()
-                    }
+                        ),
+                        onSuccess = onBack,
+                        onError = { error ->
+                            // Обработка ошибки сохранения
+                            // Можно показать Snackbar или Toast
+                        }
+                    )
                 }
             ) {
                 Text(if (note == null) "Создать" else "Сохранить")
