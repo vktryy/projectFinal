@@ -38,14 +38,14 @@ data class Notes(
 @Dao
 interface NoteDao {
     @Query("SELECT * FROM notes")
-    suspend fun getAll(): List<Note>
+    fun getAll(): List<Note>
 
     @Insert
-    suspend fun insert(note: Note)
+    fun insert(note: Note)
 
     @Update
-    suspend fun update(note: Note)
+    fun update(note: Note)
 
     @Delete
-    suspend fun delete(note: Note)
+    fun delete(note: Note)
 }
