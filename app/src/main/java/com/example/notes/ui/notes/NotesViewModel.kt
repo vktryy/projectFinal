@@ -10,11 +10,10 @@ import kotlinx.coroutines.launch
 class NotesViewModel : ViewModel() {
     private val _notes = MutableStateFlow<List<Note>>(emptyList())
     val notes: StateFlow<List<Note>> = _notes
-    private var nextId = 1
 
     fun addNote(note: Note) {
         viewModelScope.launch {
-            _notes.value = _notes.value + note
+            _notes.value += note
         }
     }
 

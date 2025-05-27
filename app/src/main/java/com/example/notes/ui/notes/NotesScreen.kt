@@ -3,8 +3,6 @@ package com.example.notes.ui.notes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.data.Note
-import com.example.notes.ui.notes.NotesViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +30,7 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
     Scaffold(
         topBar = { TopAppBar(title = { Text("Заметки") }) },
         floatingActionButton = {
-            FloatingActionButton(
+            Button(
                 onClick = {
                     currentNote = null
                     dialogTitle = ""
@@ -41,14 +38,14 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                     showDialog = true
                 },
                 modifier = Modifier
+                    .fillMaxWidth()
                     .padding(16.dp),
-                containerColor = Color.Black
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Добавить",
-                    tint = Color.White
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
                 )
+            ) {
+                Text("Добавить заметку")
             }
         }
     ) { padding ->
@@ -57,9 +54,9 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
-                contentAlignment = Alignment.TopStart
+                contentAlignment = Alignment.TopCenter
             ) {
-                Text("Нажмите плюсик")
+                Text("Нажмите Добавить заметку")
             }
         } else {
             LazyColumn(modifier = Modifier.padding(padding)) {
@@ -78,7 +75,7 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text(currentNote?.let { "Редактировать" } ?: "Новая") },
+            title = { Text(currentNote?.let { "Редактировать" } ?: "Новая заметка") },
             text = {
                 Column {
                     OutlinedTextField(
@@ -116,7 +113,11 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                             )
                         }
                         showDialog = false
-                    }
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Green,
+                        contentColor = Color.Black
+                    )
                 ) {
                     Text("Сохранить")
                 }
@@ -128,7 +129,10 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                             viewModel.deleteNote(currentNote!!)
                             showDialog = false
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color.Cyan,
+                            contentColor = Color.Black
+                        )
                     ) {
                         Text("Удалить")
                     }
