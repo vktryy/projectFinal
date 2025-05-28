@@ -1,15 +1,6 @@
 package com.example.notes.data
 
-import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.Delete
-import androidx.room.Entity
-import androidx.room.Insert
-import androidx.room.PrimaryKey
-import androidx.room.Query
-import androidx.room.Room
-import androidx.room.RoomDatabase
-import androidx.room.Update
+import androidx.room.*
 import android.content.Context
 
 @Database(
@@ -50,14 +41,11 @@ interface NoteDao {
     fun getAll(): List<Note>
 
     @Insert
-    suspend fun insert(note: Note)
-
-    @Insert
-    suspend fun insertAll(notes: List<Note>)
+    fun insert(note: Note)
 
     @Update
-    suspend fun update(note: Note)
+    fun update(note: Note)
 
     @Delete
-    suspend fun delete(note: Note)
+    fun delete(note: Note)
 }

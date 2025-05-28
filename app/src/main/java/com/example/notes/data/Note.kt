@@ -8,5 +8,5 @@ data class Note(
     @PrimaryKey
     val id: String,
     val title: String,
-    val text: String
+    val content: String
 )
