@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.data.Note
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,7 +19,6 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
     val notes by viewModel.notes.collectAsState(emptyList())
     var showDialog by remember { mutableStateOf(false) }
     var currentNote by remember { mutableStateOf<Note?>(null) }
-    var dialogId by remember { mutableStateOf("") }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogContent by remember { mutableStateOf("") }
 
@@ -106,7 +106,7 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                         } else {
                             viewModel.addNote(
                                 Note(
-                                    id = dialogId,
+                                    id = UUID.randomUUID().toString(), // Генерируем уникальный ID
                                     title = dialogTitle,
                                     content = dialogContent
                                 )
@@ -123,18 +123,30 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                 }
             },
             dismissButton = {
-                if (currentNote != null) {
+                Row {
+                    if (currentNote != null) {
+                        Button(
+                            onClick = {
+                                viewModel.deleteNote(currentNote!!)
+                                showDialog = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Blue,
+                                contentColor = Color.White
+                            ),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Text("Удалить")
+                        }
+                    }
                     Button(
-                        onClick = {
-                            viewModel.deleteNote(currentNote!!)
-                            showDialog = false
-                        },
+                        onClick = { showDialog = false },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Cyan,
-                            contentColor = Color.Black
+                            containerColor = Color.Magenta,
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Удалить")
+                        Text("Отмена")
                     }
                 }
             }
