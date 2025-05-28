@@ -11,6 +11,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notes.data.Note
+import com.example.notes.theme.Purple80
+import com.example.notes.theme.PurpleGrey40
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -18,13 +21,14 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
     val notes by viewModel.notes.collectAsState(emptyList())
     var showDialog by remember { mutableStateOf(false) }
     var currentNote by remember { mutableStateOf<Note?>(null) }
-    var dialogId by remember { mutableStateOf("") }
     var dialogTitle by remember { mutableStateOf("") }
     var dialogContent by remember { mutableStateOf("") }
+    var dialogCategory by remember { mutableStateOf("") }
 
     LaunchedEffect(currentNote) {
         dialogTitle = currentNote?.title ?: ""
         dialogContent = currentNote?.content ?: ""
+        dialogCategory = currentNote?.category ?: ""
     }
 
     Scaffold(
@@ -35,11 +39,13 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                     currentNote = null
                     dialogTitle = ""
                     dialogContent = ""
+                    dialogCategory = ""
+
                     showDialog = true
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(60.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
                     contentColor = Color.White
@@ -91,6 +97,13 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                         label = { Text("Содержание") },
                         modifier = Modifier.fillMaxWidth()
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = dialogCategory,
+                        onValueChange = { dialogCategory = it },
+                        label = { Text("Категория") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             },
             confirmButton = {
@@ -106,9 +119,10 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                         } else {
                             viewModel.addNote(
                                 Note(
-                                    id = dialogId,
+                                    id = UUID.randomUUID().toString(),
                                     title = dialogTitle,
-                                    content = dialogContent
+                                    content = dialogContent,
+                                    category = dialogCategory
                                 )
                             )
                         }
@@ -123,18 +137,30 @@ fun NotesScreen(viewModel: NotesViewModel = viewModel()) {
                 }
             },
             dismissButton = {
-                if (currentNote != null) {
+                Row {
+                    if (currentNote != null) {
+                        Button(
+                            onClick = {
+                                viewModel.deleteNote(currentNote!!)
+                                showDialog = false
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = Color.Blue,
+                                contentColor = Color.White
+                            ),
+                            modifier = Modifier.padding(end = 8.dp)
+                        ) {
+                            Text("Удалить")
+                        }
+                    }
                     Button(
-                        onClick = {
-                            viewModel.deleteNote(currentNote!!)
-                            showDialog = false
-                        },
+                        onClick = { showDialog = false },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Cyan,
-                            contentColor = Color.Black
+                            containerColor = Color.Magenta,
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Удалить")
+                        Text("Отмена")
                     }
                 }
             }
@@ -151,9 +177,14 @@ fun NoteItem(note: Note, onClick: () -> Unit) {
             .padding(8.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            Text(text = note.title, style = MaterialTheme.typography.titleMedium)
+            Row() {
+                Text(text = note.title, style = MaterialTheme.typography.titleLarge)
+                Spacer(modifier = Modifier.width(70.dp))
+                Text(text = note.category, style = MaterialTheme.typography.bodyLarge, color = PurpleGrey40)
+            }
             Spacer(modifier = Modifier.height(4.dp))
             Text(text = note.content, style = MaterialTheme.typography.bodyMedium)
+
         }
     }
 }
