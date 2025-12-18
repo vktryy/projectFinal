@@ -2,6 +2,7 @@ package com.example.notes.data
 
 import androidx.room.*
 import android.content.Context
+import kotlinx.coroutines.flow.Flow
 
 @Database(
     entities = [Note::class],
@@ -27,25 +28,17 @@ abstract class NotesDatabase : RoomDatabase() {
     }
 }
 
-@Entity(tableName = "notes")
-data class Notes(
-    @PrimaryKey
-    val id: String,
-    val title: String,
-    val text: String
-)
-
 @Dao
 interface NoteDao {
     @Query("SELECT * FROM notes")
-    fun getAll(): List<Note>
+    suspend fun getAll(): List<Note>
 
     @Insert
-    fun insert(note: Note)
+    suspend fun insert(note: Note)
 
     @Update
-    fun update(note: Note)
+    suspend fun update(note: Note)
 
     @Delete
-    fun delete(note: Note)
+    suspend fun delete(note: Note)
 }

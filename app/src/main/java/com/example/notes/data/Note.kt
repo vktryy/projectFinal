@@ -9,5 +9,6 @@ data class Note(
     val id: String,
     val title: String,
     val content: String,
-    val category: String
+    val category: String,
+    val createdAt: Long = System.currentTimeMillis()
 )
