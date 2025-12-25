@@ -11,4 +11,8 @@ data class Note(
     val content: String,
     val category: String,
     val createdAt: Long = System.currentTimeMillis()
-)
+) {
+    companion object {
+        val CATEGORIES = listOf("Семья", "Отдых", "Работа")
+    }
+}
